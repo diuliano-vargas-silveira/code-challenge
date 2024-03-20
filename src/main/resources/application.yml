@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: code-challenge
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    database: postgresql
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: xxx
+    password: xxx
+    driver-class-name: org.postgresql.Driver
