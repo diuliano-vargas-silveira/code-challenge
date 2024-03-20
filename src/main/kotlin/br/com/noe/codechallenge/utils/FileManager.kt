@@ -16,7 +16,7 @@ class FileManager {
         val language = submitQuestionRequest.language
         val code = submitQuestionRequest.code
 
-        val file = File(DEFAULT_PATH + language.extension)
+        val file = File(getFilePath(language))
         file.writeText(code + "\n")
 
         val className = question.className
@@ -38,9 +38,13 @@ class FileManager {
         }
     }
 
+    fun getFilePath(language: Languages): String {
+        return DEFAULT_PATH + language.extension
+    }
+
     private fun writeTestCasesJS(file: File, className: String, testCases: List<TestCase>) {
         testCases.forEach {
-            file.appendText("console.log(\"$className(${it.input}\"))\n")
+            file.appendText("console.log($className(${it.input}))\n")
         }
     }
 
