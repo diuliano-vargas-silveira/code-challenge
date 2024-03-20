@@ -11,3 +11,6 @@ spring:
     username: xxx
     password: xxx
     driver-class-name: org.postgresql.Driver
+springdoc:
+  swagger-ui:
+    path: /
