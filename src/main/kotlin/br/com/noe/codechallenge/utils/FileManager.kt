@@ -16,6 +16,8 @@ class FileManager {
         val language = submitQuestionRequest.language
         val code = submitQuestionRequest.code
 
+        createDefaultDirectoryIfNotExists()
+
         val file = File(getFilePath(language))
         file.writeText(code + "\n")
 
@@ -40,6 +42,18 @@ class FileManager {
 
     fun getFilePath(language: Languages): String {
         return DEFAULT_PATH + language.extension
+    }
+
+    private fun createDefaultDirectoryIfNotExists() {
+        var directory = File(DEFAULT_PATH.removeSuffix("/file"))
+
+        if(!directory.exists()) {
+            val isDirectoryCreatedSuccessfully = directory.mkdirs()
+
+            if(!isDirectoryCreatedSuccessfully) {
+                throw RuntimeException("Failed to create default directory.")
+            }
+        }
     }
 
     private fun writeTestCasesJS(file: File, className: String, testCases: List<TestCase>) {
