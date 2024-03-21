@@ -6,9 +6,10 @@ import br.com.noe.codechallenge.enums.Languages
 import br.com.noe.codechallenge.models.Question
 import br.com.noe.codechallenge.models.TestCase
 import br.com.noe.codechallenge.utils.FileManager
+import kotlinx.coroutines.time.withTimeoutOrNull
 import org.springframework.stereotype.Service
-import java.io.File
-import java.nio.file.Files
+import java.time.Duration
+import kotlin.system.measureTimeMillis
 
 @Service
 class QuestionService(val fileManager: FileManager) {
@@ -20,7 +21,7 @@ class QuestionService(val fileManager: FileManager) {
             1,
             "Hello ...",
             "Write a function that receives a string and returns a greeting message with the string",
-            1000,
+            1000L,
             "hello",
             listOf(
                 TestCase(1, "\"Brasil\"", "Hello Brasil!", false),
@@ -31,7 +32,7 @@ class QuestionService(val fileManager: FileManager) {
             2,
             "Reverse a string",
             "Write a function that reverses a string",
-            1000,
+            1000L,
             "reverse",
             listOf(
                 TestCase(3, "\"hello\"", "olleh", false),
@@ -44,7 +45,7 @@ class QuestionService(val fileManager: FileManager) {
         return questions.map { SimpleQuestionResponseDTO(it.id, it.title) }
     }
 
-    fun submitQuestion(id: Int, submitQuestion: SubmitQuestionRequest): String {
+    suspend fun submitQuestion(id: Int, submitQuestion: SubmitQuestionRequest): String {
         val selectedQuestion = questions.find { it.id == id }
 
         if (selectedQuestion == null)
@@ -52,8 +53,16 @@ class QuestionService(val fileManager: FileManager) {
 
         fileManager.writeFile(submitQuestion, selectedQuestion)
 
-        val output = compileFile(submitQuestion.language)
-        val outputArray = output.split(BREAK_LINE).toMutableList()
+        var output: String?
+        val time = measureTimeMillis {
+            output = compileFile(submitQuestion.language, selectedQuestion.timeLimit)
+        }
+
+        if (output == null) {
+            return "Time limit exceeded"
+        }
+
+        val outputArray = output!!.split(BREAK_LINE).toMutableList()
         outputArray.pop()
 
         var correctAnswers = 0
@@ -63,14 +72,16 @@ class QuestionService(val fileManager: FileManager) {
             }
         }
 
-        return output
+        return output as String
     }
 
-    private fun compileFile(language: Languages): String {
-        return ProcessBuilder(language.runCommand, fileManager.getFilePath(language))
-            .start()
-            .inputStream
-            .bufferedReader().readText()
+    private suspend fun compileFile(language: Languages, timeLimit: Long): String? {
+        return withTimeoutOrNull(Duration.ofMillis(timeLimit)) {
+            ProcessBuilder(language.runCommand, fileManager.getFilePath(language))
+                .start()
+                .inputStream
+                .bufferedReader().readText()
+        }
     }
 
     fun<E> MutableList<E>.pop(): E {

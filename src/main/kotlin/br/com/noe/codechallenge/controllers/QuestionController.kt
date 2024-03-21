@@ -13,7 +13,7 @@ data class QuestionController(val questionService: QuestionService) {
     fun getQuestions(): List<SimpleQuestionResponseDTO> = questionService.getQuestionsP()
 
     @PostMapping("/{id}")
-    fun submitQuestion(@PathVariable id: Int, @RequestBody submitQuestion: SubmitQuestionRequest): String {
+    suspend fun submitQuestion(@PathVariable id: Int, @RequestBody submitQuestion: SubmitQuestionRequest): String {
         return questionService.submitQuestion(id, submitQuestion)
     }
 }

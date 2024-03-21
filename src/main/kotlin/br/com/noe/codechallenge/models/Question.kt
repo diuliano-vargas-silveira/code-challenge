@@ -10,7 +10,7 @@ class Question(
     val id: Int,
     val title: String,
     val description: String,
-    val timeLimitInMs: Int,
+    val timeLimit: Long,
     val className: String,
     @OneToMany(mappedBy = "question", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     val testCases: List<TestCase>
